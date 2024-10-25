@@ -57,6 +57,6 @@ func (sfc Sfcache[T]) Delete(key string) {
 	sfc.cache.Del([]byte(key))
 }
 
-func (sfc Sfcache[T]) Clear(key string) {
+func (sfc Sfcache[T]) Clear() {
 	sfc.cache.Clear()
 }
