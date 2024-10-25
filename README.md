@@ -11,14 +11,16 @@ type Hoge struct {
 	Name string
 }
 
-cacheSizeBytes := 1024 * 1024
-expireSeconds := 30
-hogeSfc := sfcache.New[Hoge](cacheSizeBytes, expireSeconds)
+var cacheSizeBytes = 10 * 1024 * 1024
+var expireSeconds = 30
+var hogeSfc = sfcache.New[Hoge](cacheSizeBytes, expireSeconds)
 
-key = "key"
-hoge, err = hogeSfc.Do(key, func() (*Hoge, error) {
-	return getHoge()
-})
+func getHogeWithCache() (*Hoge, error) {
+  key := "key"
+  return hogeSfc.Do(key, func() (*Hoge, error) {
+    return getHoge()
+  })
+}
 
 func getHoge() (*Hoge, error) {
   return &Hoge{
