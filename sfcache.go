@@ -22,15 +22,15 @@ func New[T any](cacheSizeBytes int, expireSeconds int) *Sfcache[T] {
 
 func (sfc Sfcache[T]) Do(key string, fn func() (*T, error)) (*T, error) {
 	v, err, _ := sfc.group.Do(key, func() (interface{}, error) {
-		got, err := sfc.cache.Get([]byte(key))
+		cachedJson, err := sfc.cache.Get([]byte(key))
 		if err == nil {
-			var data T
-			err = json.Unmarshal(got, &data)
+			var cached T
+			err = json.Unmarshal(cachedJson, &cached)
 			if err != nil {
 				return nil, err
 			}
 
-			return &data, nil
+			return &cached, nil
 		}
 
 		data, err := fn()
