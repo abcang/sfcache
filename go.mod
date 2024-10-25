@@ -1,4 +1,4 @@
-module abcang/sfcache
+module github.com/abcang/sfcache
 
 go 1.21.5
 
