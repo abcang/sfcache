@@ -13,9 +13,9 @@ type Sfcache[T any] struct {
 	expireSeconds int
 }
 
-func New[T any](cacheSize int, expireSeconds int) *Sfcache[T] {
+func New[T any](cacheSizeBytes int, expireSeconds int) *Sfcache[T] {
 	return &Sfcache[T]{
-		cache:         freecache.NewCache(cacheSize),
+		cache:         freecache.NewCache(cacheSizeBytes),
 		expireSeconds: expireSeconds,
 	}
 }

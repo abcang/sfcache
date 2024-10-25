@@ -13,7 +13,9 @@ type Hoge struct {
 }
 
 func TestDo(t *testing.T) {
-	hogeSfc := New[Hoge](1000, 3)
+	cacheSizeBytes := 1024 * 1024
+	expireSeconds := 3
+	hogeSfc := New[Hoge](cacheSizeBytes, expireSeconds)
 
 	key := "key"
 	exec := func() (*Hoge, error) {
