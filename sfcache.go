@@ -43,7 +43,7 @@ func (sfc Sfcache[T]) Do(key string, fn func() (*T, error)) (*T, error) {
 			return nil, err
 		}
 
-		sfc.cache.Set([]byte(key), []byte(jsonData), sfc.expireSeconds)
+		sfc.cache.Set([]byte(key), jsonData, sfc.expireSeconds)
 
 		return data, nil
 	})
