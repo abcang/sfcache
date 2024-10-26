@@ -1,7 +1,7 @@
 sfcache
 ===
 
-singleflight + on memory cache
+singleflight + in memory cache
 
 ## Example Usage
 
