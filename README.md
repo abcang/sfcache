@@ -15,9 +15,9 @@ type Hoge struct {
 	Name string
 }
 
-var cacheSizeBytes = 10 * 1024 * 1024
-var expireSeconds = 30
-var hogeSfc = sfcache.New[Hoge](cacheSizeBytes, expireSeconds)
+var itemSize = 100
+var ttl = 30 * time.Second
+var hogeSfc = sfcache.New[*Hoge](itemSize, ttl)
 
 func getHogeWithCache(id int64) (*Hoge, error) {
 	key := strconv.Itoa(int(id))
