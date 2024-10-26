@@ -1,36 +1,28 @@
 package sfcache
 
 import (
-	"encoding/json"
+	"time"
 
-	"github.com/coocood/freecache"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	"golang.org/x/sync/singleflight"
 )
 
 type Sfcache[T any] struct {
-	group         singleflight.Group
-	cache         *freecache.Cache
-	expireSeconds int
+	group singleflight.Group
+	cache *expirable.LRU[string, T]
 }
 
-func New[T any](cacheSizeBytes int, expireSeconds int) *Sfcache[T] {
+func New[T any](itemSize int, ttl time.Duration) *Sfcache[T] {
 	return &Sfcache[T]{
-		cache:         freecache.NewCache(cacheSizeBytes),
-		expireSeconds: expireSeconds,
+		cache: expirable.NewLRU[string, T](itemSize, nil, ttl),
 	}
 }
 
-func (sfc Sfcache[T]) Do(key string, fn func() (*T, error)) (*T, error) {
+func (sfc Sfcache[T]) Do(key string, fn func() (T, error)) (T, error) {
 	v, err, _ := sfc.group.Do(key, func() (interface{}, error) {
-		cachedJson, err := sfc.cache.Get([]byte(key))
-		if err == nil {
-			var cached T
-			err = json.Unmarshal(cachedJson, &cached)
-			if err != nil {
-				return nil, err
-			}
-
-			return &cached, nil
+		cached, ok := sfc.cache.Get(key)
+		if ok {
+			return cached, nil
 		}
 
 		data, err := fn()
@@ -38,25 +30,21 @@ func (sfc Sfcache[T]) Do(key string, fn func() (*T, error)) (*T, error) {
 			return nil, err
 		}
 
-		jsonData, err := json.Marshal(*data)
-		if err != nil {
-			return nil, err
-		}
-
-		sfc.cache.Set([]byte(key), jsonData, sfc.expireSeconds)
+		sfc.cache.Add(key, data)
 
 		return data, nil
 	})
 	if err != nil {
-		return nil, err
+		var dummy T
+		return dummy, err
 	}
-	return v.(*T), nil
+	return v.(T), nil
 }
 
 func (sfc Sfcache[T]) Delete(key string) {
-	sfc.cache.Del([]byte(key))
+	sfc.cache.Remove(key)
 }
 
 func (sfc Sfcache[T]) Clear() {
-	sfc.cache.Clear()
+	sfc.cache.Purge()
 }

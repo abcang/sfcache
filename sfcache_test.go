@@ -13,9 +13,9 @@ type Hoge struct {
 }
 
 func TestDo(t *testing.T) {
-	cacheSizeBytes := 1024 * 1024
-	expireSeconds := 3
-	hogeSfc := New[Hoge](cacheSizeBytes, expireSeconds)
+	itemSize := 100
+	ttl := 3 * time.Second
+	hogeSfc := New[*Hoge](itemSize, ttl)
 
 	key := "key"
 	exec := func() (*Hoge, error) {
@@ -46,11 +46,11 @@ func TestDo(t *testing.T) {
 
 	assert.Exactly(t, expected, *hoge)
 
-	_, err = hogeSfc.cache.Get([]byte(key))
-	assert.NoError(t, err)
+	_, ok := hogeSfc.cache.Get(key)
+	assert.True(t, ok)
 
 	time.Sleep(5 * time.Second)
 
-	_, err = hogeSfc.cache.Get([]byte(key))
-	assert.EqualError(t, err, "Entry not found")
+	_, ok = hogeSfc.cache.Get(key)
+	assert.False(t, ok)
 }
